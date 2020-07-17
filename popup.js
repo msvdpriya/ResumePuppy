@@ -31,10 +31,11 @@
       chrome.tabs.query(
         { windowId: chrome.windows.WINDOW_ID_CURRENT },
         function (tabs) {
-          for (var i = 0; i < tabs.length; i++) {
-            var tab = tabs[i];
+          for (let i = 0; i < tabs.length; i++) {
+            let tab = tabs[i];
             if (tab.url?.includes(linkedUrl) === true) {
                 chrome.tabs.sendMessage(tab.id, {
+                  message:'updated',
                   h1b: h1bToggleButton?.checked,
                   gc: gcToggleButton?.checked,
                 });

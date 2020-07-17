@@ -21,6 +21,7 @@ chrome.tabs.onUpdated.addListener(
         chrome.storage.sync.get(["h1b","gc"], function (data) {
             console.log('on update')
             chrome.tabs.sendMessage(tab.id, {
+                message:'urlChanged',
                 h1b: data.h1b,
                 gc: data.gc,
               });
