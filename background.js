@@ -14,3 +14,18 @@ chrome.runtime.onInstalled.addListener(function() {
     });
 
 })
+chrome.tabs.onUpdated.addListener(
+    function(tabId, changeInfo, tab) {
+      console.log(tabId,changeInfo);
+      if (changeInfo.status === "complete") {
+        chrome.storage.sync.get(["h1b","gc"], function (data) {
+            console.log('on update')
+            chrome.tabs.sendMessage(tab.id, {
+                h1b: data.h1b,
+                gc: data.gc,
+              });
+          });
+        
+      }
+    }
+  );

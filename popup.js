@@ -6,15 +6,13 @@
   let linkedUrl = "https://www.linkedin.com/jobs/view/"
 
   // check from storage and accordingly check or uncheck the button
-  chrome.storage.sync.get("h1b", function (data) {
+
+  chrome.storage.sync.get(["h1b","gc"], function (data) {
+    gcToggleButton.checked = data.gc;
     h1bToggleButton.checked = data.h1b;
     toggleClick();
-  });
-  chrome.storage.sync.get("gc", function (data) {
-    gcToggleButton.checked = data.gc;
-    toggleClick();
-  });
 
+  });
   
   // add event listener for the change of toggle button
   h1bToggleButton.addEventListener("change", (event) => {
