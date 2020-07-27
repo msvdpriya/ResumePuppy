@@ -26,11 +26,13 @@
         {
           "matches": ["https://www.linkedin.com/jobs/view/*","http://www.linkedin.com/jobs/view/*"],
           "run_at": "document_idle",
-          "js": ["app.js"]
+          "js": ["app.js"],
+          "css": ["app.css"]
         }
       ],
     "manifest_version": 2,
     "web_accessible_resources": [
-      "images/*.png"
+      "images/*.png",
+      "button.html"
     ]
   }

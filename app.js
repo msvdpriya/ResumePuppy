@@ -1,65 +1,66 @@
-let serverUrl = 'localhost:8080'
-function startApp(request) {
-  companyName = document.querySelector(".entry-jobs-top-card__job-title")
-    ?.textContent;
-  //for testing
-  response = { h1b: "high", gc: "low" };
-  showButton(request, response);
-//   serverURL = serverUrl + '/?company=' + companyName;
-//   let xhttp = new XMLHttpRequest();
-//   xhttp.onreadystatechange = function () {
-//       if (this.readyState == 4 && this.status == 200) {
-//           // Typical action to be performed when the document is ready:
-//           showButton(xhttp.response)
-//       }
-//   };
-//   xhttp.open("GET", serverURL, true);
-//   xhttp.send();
+let serverUrl = "https://dev.resumepuppy.com/";
+
+function getCompanyName() {
+  return document.querySelector(".jobs-top-card__company-url")?.innerText;
 }
 
-function showButton(request, response) {
+function getStatusVisibilyClass(isEnabled) {
+  return isEnabled ? `show` : `hide`;
+}
 
-  let appHTML =
-    `<div id="resume-puppy-button" style="margin-left: 5px;">
-<div style="display:inline-block;">
-<img style="height:4rem; width:4rem;" src="` +
-    chrome.runtime.getURL("images/icon2.png") +
-    `" />
-</div>
-<div style="display:inline-block;font-weight: bold;width:80px">
-<div id='h1b-result' style="display: ` +
-    (request.h1b ? `inline-block` : `none`) +
-    `;" >
-H1B: <span style="color:` +
-    (response.h1b == `low` ? `#e95858` : `#16c35f`) +
-    `"> ` +
-    response.h1b +
-    `</span>
-</div>
-<div id = 'gc-result' style="display:` +
-    (request.gc ? `inline-block` : `none`) +
-    `">
-GC:  <span style="color:` +
-    (response.gc == `low` ? `#e95858` : `#16c35f`) +
-    `"> ` +
-    response.gc +
-    `</span>
-</div>
-</div>
-  </div>`;
-  let appContainer = document.getElementsByClassName(
-    "jobs-top-card__actions"
-  )[0];
+function getVisaStatus(visaTypeArray)
+{
+  return {
+    h1b: visaTypeArray.includes('H1-B')?'high':'low',
+     gc: visaTypeArray.includes('PERM')?'high':'low'
+  }
+}
+function startApp(request) {
+  let companyName = getCompanyName();
+  console.log(companyName);
+  let url = serverUrl + "ext/visa/" + companyName;
+  fetch(url)
+    .then((response) => response.text())
+    .then((data) => {      
+      showComponent(request,getVisaStatus(data.type));
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+}
+function addComponent(request, response, data) {
+  let appContainer = document.querySelector(".jobs-top-card__actions");
 
-  appContainer.innerHTML += appHTML;
-  document.getElementsByClassName(
-    "jobs-top-card__save-button"
-  )[0].style.height = `4rem`;
+  appContainer.innerHTML += data;
+  document.querySelector("#rp-icon").src = chrome.runtime.getURL(
+    "images/icon2.png"
+  );
+  let h1bresult = document.querySelector("#h1b-result span");
+  let gcresult = document.querySelector("#gc-result span");
+
+  h1bresult.innerHTML = response.h1b;
+  gcresult.innerHTML = response.gc;
+  h1bresult.classList.add(response.h1b);
+  gcresult.classList.add(response.gc);
+  h1bresult.parentElement.classList.add(getStatusVisibilyClass(request.h1b));
+  gcresult.parentElement.classList.add(getStatusVisibilyClass(request.gc));
+  document.querySelector(".jobs-top-card__save-button").style.height = `4rem`;
+}
+
+function showComponent(request, response) {
+  fetch(chrome.extension.getURL("button.html"))
+    .then((response) => response.text())
+    .then((data) => {
+      addComponent(request, response, data);
+    })
+    .catch((err) => {
+      console.log(err);
+    });
 }
 
 function exitApp() {
   // console.log('app exiting');
-  let resumePuppyButton = document.getElementById("resume-puppy-button");
+  let resumePuppyButton = document.querySelector("#resume-puppy-button");
   if (!(resumePuppyButton == null)) {
     resumePuppyButton.remove();
   }
@@ -68,16 +69,15 @@ function exitApp() {
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   // listen for messages sent from popup.js
 
-  if (request.message == 'updated' && (request.h1b || request.gc)) {
+  if (request.message == "updated" && (request.h1b || request.gc)) {
     exitApp();
     startApp(request);
-  } else if (request.message == 'urlChanged' &&( request.h1b || request.gc)){
+  } else if (request.message == "urlChanged" && (request.h1b || request.gc)) {
     setTimeout(() => {
-        exitApp();
-        startApp(request);
-      }, 3000);
-  }
-  else {
+      exitApp();
+      startApp(request);
+    }, 3000);
+  } else {
     console.log("remove button");
     exitApp();
   }

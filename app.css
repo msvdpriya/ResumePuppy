@@ -1,0 +1,15 @@
+.low{
+color:#e95858
+}
+
+.high{
+color: #16c35f;
+}
+
+.show{
+display: inline-block;
+}
+
+.hide{
+display: none;
+}
